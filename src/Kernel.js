@@ -194,7 +194,7 @@ class Kernel {
                     subResult.forEach(sub => result.push(sub))
                 } else {
                     if (javascriptER.test(file.name)) {
-                        file.absolute = directory + file.name;
+                        file.absolute = path.join(directory , file.name);
                         file.relative = file.absolute.replace(origDirectory, '');
                         result.push(file);
                     }
