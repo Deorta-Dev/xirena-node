@@ -558,7 +558,7 @@ class Kernel {
                 let explorer;
                 // Add intern services
                 explorer = this._globalConfig.services;
-                if(explorer) explorer = {};
+                if(!explorer) explorer = {};
                 if(!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
@@ -569,7 +569,7 @@ class Kernel {
 
                 // Add intern annotations
                 explorer = this._globalConfig.annotations;
-                if(explorer) explorer = {};
+                if(!explorer) explorer = {};
                 if(!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
