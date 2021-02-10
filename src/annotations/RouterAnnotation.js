@@ -1,4 +1,4 @@
-const AbstractAnnotation = require('../core/AbstractAnnotation.js');
+const AbstractAnnotation = require('../AbstractAnnotation');
 let handles = [];
 let appScope = {};
 
