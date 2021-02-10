@@ -321,12 +321,12 @@ class Kernel {
         console.log(` Loading Controllers`);
         if (config['controllers'] !== undefined) {
             if (config['controllers']['mapping'] === 'auto') {
-                let src = services['controllers']['src'];
+                let src = config['controllers']['src'];
                 let directoryPath = path.join(this._projectDir, src);
                 let files = getFilesDirectory(directoryPath);
                 let $this = this;
                 files.forEach(function (file) {
-                    if (file.relative.endsWith('Service.js')) {
+                    if (file.relative.endsWith('Controller.js')) {
                         let buildFile = function () {
                             console.log(` --> ${file.relative}`);
                             let classController = require(file.absolute);
