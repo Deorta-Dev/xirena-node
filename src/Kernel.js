@@ -236,7 +236,7 @@ class Kernel {
                 if (!Array.isArray(exp)) {
                     if (exp['mapping'] === 'auto') {
                         let src = exp['src'];
-                        let directoryPath = path.join(this._projectDir, src);
+                        let directoryPath = exp.absolute ? src : path.join(this._projectDir, src);
                         importAnnotations(getFilesDirectory(directoryPath));
                     }
                 } else {
@@ -299,7 +299,7 @@ class Kernel {
                 if (!Array.isArray(exp)) {
                     if (exp['mapping'] === 'auto') {
                         let src = exp['src'];
-                        let directoryPath = path.join(this._projectDir, src);
+                        let directoryPath = exp.absolute ? src : path.join(this._projectDir, src);
                         importServices(getFilesDirectory(directoryPath));
                     }
                 } else {
@@ -319,8 +319,8 @@ class Kernel {
          */
         let controllerBuilds = [];
         console.log(` Loading Controllers`);
-        if (services['controllers'] !== undefined) {
-            if (services['controllers']['mapping'] === 'auto') {
+        if (config['controllers'] !== undefined) {
+            if (config['controllers']['mapping'] === 'auto') {
                 let src = services['controllers']['src'];
                 let directoryPath = path.join(this._projectDir, src);
                 let files = getFilesDirectory(directoryPath);
@@ -562,6 +562,7 @@ class Kernel {
                 if(!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
+                    absolute: true,
                     src: path.join(__dirname, '/services')
                 });
                 this._globalConfig.services = explorer;
@@ -572,6 +573,7 @@ class Kernel {
                 if(!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
+                    absolute: true,
                     src: path.join(__dirname, '/annotations')
                 });
                 this._globalConfig.annotations = explorer;
