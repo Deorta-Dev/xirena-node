@@ -9,7 +9,6 @@ const net = require('net');
 let ip = require('ip');
 let appScope = {};
 const Base64 = require('base64-min');
-const AbstractController = require('../core/AbstractController');
 let CookieParser = require('cookie-parser');
 
 
