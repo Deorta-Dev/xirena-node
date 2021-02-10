@@ -585,12 +585,12 @@ class Kernel {
     }
 
     set configDir(value) {
-        this.configDir = value;
+        this._configDir = value;
         return this;
     }
 
     get configDir() {
-        return this.configDir;
+        return this._configDir;
     }
 
     set projectDir(value) {
