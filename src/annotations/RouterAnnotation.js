@@ -73,7 +73,18 @@ class RouterAnnotation extends AbstractAnnotation {
                 params['$next'] = nextFn;
                 params['$send'] = sendFn;
                 params['$scope'] = {};
-                nextFn();
+                if(request.body === undefined){
+                    var body = '';
+                    request.on('data', chunk => body += chunk);
+                    request.on('end', ()=> {
+                        try{
+                            body = JSON.parse(body);
+                        }catch (e){}
+                        request.body = body;
+                        nextFn();
+                    });
+                }else  nextFn();
+
             }
         };
         switch (method) {

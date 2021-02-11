@@ -1,6 +1,7 @@
 const Twig = require('twig');
 const fs = require('fs');
-
+const path = require('path')
+let config;
 module.exports = {
     render: {
         /**
@@ -9,19 +10,21 @@ module.exports = {
          * @param application {Application}
          */
         build: (kernel, application) => {
+            config = kernel.getConfig('twig');
+            config.src = path.join(kernel.projectDir , config.src);
 
         },
         instance: (services) => {
             return (twigFile, data) => {
-                (({$response, $request}) => {
-                    let template = fs.readFileSync(__dirname + "/../../../views/" + twigFile, 'utf8');
+                (({$response, $request, $kernel}) => {
+                    let template = fs.readFileSync(path.join(config.src,twigFile ) , 'utf8');
                     Twig.extendFunction("asset", value => {
                         return $request.protocol+'://'+$request.get('host') + '/' +value;
                     });
                     let compiled = Twig.twig({
                         data: template,
                         namespaces: {
-                            'views': __dirname + "/../../../views/"
+                            'views': config.src
                         },
                     }).render(data);
                     $response.send(compiled);

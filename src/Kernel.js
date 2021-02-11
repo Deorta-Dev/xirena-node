@@ -329,21 +329,8 @@ class Kernel {
                     if (file.relative.endsWith('Controller.js')) {
                         let buildFile = function () {
                             console.log(` --> ${file.relative}`);
-                            let classStringController = fs.readFileSync(file.absolute, 'utf8');
-                            let annotations = reflection.getClassAnnotations(classStringController, $this.annotations);
-                            annotations.forEach(a => {
-                                classStringController = classStringController.replace(a.annotation, '');
-                            });
-                            let classController;
-                            try {
-                                if (classStringController.includes('module.exports'))
-                                    classStringController = classStringController.replace('module.exports', 'classController');
-                                else
-                                    classStringController = classStringController.replace('class', 'classController = class');
-                                eval(classStringController);
-                            } catch (e) {
-                                console.error(` ${file.relative} no instance`);
-                            }
+                            let classController = require(file.absolute);
+                            let annotations = reflection.getClassAnnotations(classController, $this.annotations);
                             if (typeof classController === 'function') {
                                 let controller = new classController();
                                 annotations.forEach(annotation => {
@@ -367,7 +354,6 @@ class Kernel {
                 });
             }
         }
-
         console.log(' Build Services');
 
         let buildServicesReady = 0;
