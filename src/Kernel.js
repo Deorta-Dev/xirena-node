@@ -444,8 +444,12 @@ class Kernel {
     startApplication() {
         let config = this.globalConfig;
         app.use(express.json({type: '*/*'}));
-        app.use(CookieParser());
-        app.use(express.static(config.publicDir || this._publicDir || this._projectDir + '../public'));
+        let publicDir = this._projectDir + '/public';
+        if(config.public){
+            publicDir = path.join( this._projectDir , config.public);
+        }
+        console.log(" Using for public directory ->", publicDir);
+        app.use(express.static(publicDir));
         let appPort = config['app_port'];
         let ssl = config['ssl'];
         if (ssl) {
