@@ -194,7 +194,7 @@ class Kernel {
                     subResult.forEach(sub => result.push(sub))
                 } else {
                     if (javascriptER.test(file.name)) {
-                        file.absolute = path.join(directory , file.name);
+                        file.absolute = path.join(directory, file.name);
                         file.relative = file.absolute.replace(origDirectory, '');
                         result.push(file);
                     }
@@ -329,10 +329,19 @@ class Kernel {
                     if (file.relative.endsWith('Controller.js')) {
                         let buildFile = function () {
                             console.log(` --> ${file.relative}`);
-                            let classController = require(file.absolute);
+                            let classStringController = fs.readFileSync(file.absolute);
+                            let classController;
+                            let annotations = reflection.getClassAnnotations(classStringController, $this.annotations);
+                            annotations.forEach(a => {
+                                classStringController = classStringController.replace(a.annotation, '');
+                            });
+                            try {
+                                eval('classController = ' + classStringController)
+                            } catch (e) {
+                                console.error(` ${file.relative} no instance`);
+                            }
                             if (typeof classController === 'function') {
                                 let controller = new classController();
-                                let annotations = reflection.getClassAnnotations(classController, $this.annotations);
                                 annotations.forEach(annotation => {
                                     let abstractAnnotation = eval("$this.annotations." + annotation.annotation);
                                     abstractAnnotation.fn = controller[annotation.fn];
@@ -529,6 +538,7 @@ class Kernel {
     }
 
     addAnnotations(value, fn) {
+        global['@' + value] = fn;
         this._annotations[value] = fn;
     }
 
@@ -558,8 +568,8 @@ class Kernel {
                 let explorer;
                 // Add intern services
                 explorer = this._globalConfig.services;
-                if(!explorer) explorer = {};
-                if(!Array.isArray(explorer)) explorer = [explorer];
+                if (!explorer) explorer = {};
+                if (!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
                     absolute: true,
@@ -569,8 +579,8 @@ class Kernel {
 
                 // Add intern annotations
                 explorer = this._globalConfig.annotations;
-                if(!explorer) explorer = {};
-                if(!Array.isArray(explorer)) explorer = [explorer];
+                if (!explorer) explorer = {};
+                if (!Array.isArray(explorer)) explorer = [explorer];
                 explorer.push({
                     mapping: 'auto',
                     absolute: true,
