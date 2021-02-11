@@ -81,7 +81,9 @@ module.exports = {
             }
             if (inAnnotation) {
                 //console.log("In Annotation: ", line);
-                let l = line.replace(/\s{1,}\*/, '').replace(/\s{1,}\/\//, '');
+                let l = line.replace(/^(\s{1,}|\t{1,})\*{1,}/, '')
+                    .replace(/^(\s{1,}|\t{1,})(\/\/){1,}/, '')
+                    .replace(/^(\s{1,}|\t{1,})(\/\*)/, '');
                 annotationString += l;
             }
             if (/(@)[A-Za-z0-9\$]{1,}(\((.)*\))/.test(line) || (inAnnotation && line.includes(')'))) {
