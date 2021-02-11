@@ -12,7 +12,7 @@ module.exports = {
 
 
     getClassAnnotations: (Class, annotations) => {
-        if(typeof Class !== 'string') Class = Class.toString();
+        if (typeof Class !== 'string') Class = Class.toString();
         let lines = Class.replace(/\r/gi, '').split('\n');
         let isComment = false, isAnnotation = false, isFunction = false, inAnnotation = false, waitFunction = false;
         let execute = '', method = '';
@@ -25,6 +25,7 @@ module.exports = {
         let result = [];
         let r = {annotation: "", fn: "", args: []};
         let annotationString = "";
+
         function findNextFunction(key) {
             let inFunction = false;
             let functionString = "";
@@ -36,7 +37,7 @@ module.exports = {
                 }
                 if (inFunction) functionString += line;
                 if (inFunction && line.includes(')')) inFunction = false;
-                key ++;
+                key++;
             } while (key < lines.length);
 
             return functionString.replace(/\n|\t\s/, '');
@@ -56,7 +57,7 @@ module.exports = {
                     r.args = args;
                 }
                 r.fn = method;
-                while (annotationString.startsWith(' ')){
+                while (annotationString.startsWith(' ')) {
                     annotationString = annotationString.replace(' ', '');
                 }
                 r.annotation = annotationString;
@@ -66,18 +67,19 @@ module.exports = {
                 r = {annotation: "", fn: "", args: []};
             }
             for (let annotation in annotations) {
-                isAnnotation = line.includes('@' + annotation);
-                if(isAnnotation){
+                isAnnotation = line.includes('@' + annotation + ' ') || line.includes('@' + annotation+ '(');
+                if (isAnnotation) {
                     //console.log("A: ", line);
                     lastAnnotation = annotation;
                     break;
                 }
-            };
+            }
+            ;
 
             if (isAnnotation && !inAnnotation && clearSpace(line).includes('@' + lastAnnotation + '(')) {
                 inAnnotation = true;
             }
-            if(inAnnotation) {
+            if (inAnnotation) {
                 //console.log("In Annotation: ", line);
                 let l = line.replace(/\s{1,}\*/, '').replace(/\s{1,}\/\//, '');
                 annotationString += l;

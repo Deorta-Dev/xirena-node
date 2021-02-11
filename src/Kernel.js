@@ -47,20 +47,20 @@ class Kernel {
         String.prototype.normalize = function (string) {
             let rp = this;
             return rp
-                .replaceAll("á", 'a')
-                .replaceAll("é", 'e')
-                .replaceAll("í", 'i')
-                .replaceAll("ó", 'o')
-                .replaceAll("ú", 'u')
-                .replaceAll("ü", 'u')
-                .replaceAll("ñ", 'n')
-                .replaceAll("Á", 'A')
-                .replaceAll("É", 'E')
-                .replaceAll("Í", 'I')
-                .replaceAll("Ó", 'O')
-                .replaceAll("Ú", 'U')
-                .replaceAll("Ü", 'U')
-                .replaceAll("Ñ", 'N');
+                .replaceAll("?", 'a')
+                .replaceAll("?", 'e')
+                .replaceAll("?", 'i')
+                .replaceAll("?", 'o')
+                .replaceAll("?", 'u')
+                .replaceAll("?", 'u')
+                .replaceAll("?", 'n')
+                .replaceAll("?", 'A')
+                .replaceAll("?", 'E')
+                .replaceAll("?", 'I')
+                .replaceAll("?", 'O')
+                .replaceAll("?", 'U')
+                .replaceAll("?", 'U')
+                .replaceAll("?", 'N');
         };
         String.prototype.isLetter = function () {
             if (this.length === 1 && this.match(/[a-z]/i))
@@ -74,20 +74,20 @@ class Kernel {
         };
         String.prototype.toUnicode = function () {
             return this
-                .replaceAll("á", '\u00E1')
-                .replaceAll("é", '\u00E9')
-                .replaceAll("í", '\u00ED')
-                .replaceAll("ó", '\u00F3')
-                .replaceAll("ú", '\u00FA')
-                .replaceAll("ü", '\u00FC')
-                .replaceAll("ñ", '\u00F1')
-                .replaceAll("Á", '\u00C1')
-                .replaceAll("É", '\u00C9')
-                .replaceAll("Í", '\u00CD')
-                .replaceAll("Ó", '\u00D3')
-                .replaceAll("Ú", '\u00DA')
-                .replaceAll("Ü", '\u00DC')
-                .replaceAll("Ñ", '\u00D1');
+                .replaceAll("?", '\u00E1')
+                .replaceAll("?", '\u00E9')
+                .replaceAll("?", '\u00ED')
+                .replaceAll("?", '\u00F3')
+                .replaceAll("?", '\u00FA')
+                .replaceAll("?", '\u00FC')
+                .replaceAll("?", '\u00F1')
+                .replaceAll("?", '\u00C1')
+                .replaceAll("?", '\u00C9')
+                .replaceAll("?", '\u00CD')
+                .replaceAll("?", '\u00D3')
+                .replaceAll("?", '\u00DA')
+                .replaceAll("?", '\u00DC')
+                .replaceAll("?", '\u00D1');
         };
 
         function toProperCase(string) {
@@ -115,55 +115,55 @@ class Kernel {
         };
         String.prototype.cleanAccents = function () {
             let rp = this;
-            return rp.replaceAll("á", 'a')
-                .replaceAll("é", 'e')
-                .replaceAll("í", 'i')
-                .replaceAll("ó", 'o')
-                .replaceAll("ú", 'u')
-                .replaceAll("ü", 'u')
-                .replaceAll("ñ", 'n')
-                .replaceAll("Á", 'A')
-                .replaceAll("É", 'E')
-                .replaceAll("Í", 'I')
-                .replaceAll("Ó", 'O')
-                .replaceAll("Ú", 'U')
-                .replaceAll("Ü", 'U')
-                .replaceAll("Ñ", 'N');
+            return rp.replaceAll("?", 'a')
+                .replaceAll("?", 'e')
+                .replaceAll("?", 'i')
+                .replaceAll("?", 'o')
+                .replaceAll("?", 'u')
+                .replaceAll("?", 'u')
+                .replaceAll("?", 'n')
+                .replaceAll("?", 'A')
+                .replaceAll("?", 'E')
+                .replaceAll("?", 'I')
+                .replaceAll("?", 'O')
+                .replaceAll("?", 'U')
+                .replaceAll("?", 'U')
+                .replaceAll("?", 'N');
         };
         String.prototype.htmlEncode = function () {
             let rp = this;
-            rp = rp.replaceAll("á", '&aacute;');
-            rp = rp.replaceAll("é", '&eacute;');
-            rp = rp.replaceAll("í", '&iacute;');
-            rp = rp.replaceAll("ó", '&oacute;');
-            rp = rp.replaceAll("ú", '&uacute;');
-            rp = rp.replaceAll("ñ", '&ntilde;');
-            rp = rp.replaceAll("ü", '&uuml;');
-            rp = rp.replaceAll("Á", '&Aacute;');
+            rp = rp.replaceAll("?", '&aacute;');
+            rp = rp.replaceAll("?", '&eacute;');
+            rp = rp.replaceAll("?", '&iacute;');
+            rp = rp.replaceAll("?", '&oacute;');
+            rp = rp.replaceAll("?", '&uacute;');
+            rp = rp.replaceAll("?", '&ntilde;');
+            rp = rp.replaceAll("?", '&uuml;');
+            rp = rp.replaceAll("?", '&Aacute;');
             rp = rp.replaceAll("E", '&Eacute;');
-            rp = rp.replaceAll("Í", '&Iacute;');
-            rp = rp.replaceAll("Ó", '&Oacute;');
-            rp = rp.replaceAll("Ú", '&Uacute;');
-            rp = rp.replaceAll("Ñ", '&Ntilde;');
-            rp = rp.replaceAll("Ü", '&Uuml;');
+            rp = rp.replaceAll("?", '&Iacute;');
+            rp = rp.replaceAll("?", '&Oacute;');
+            rp = rp.replaceAll("?", '&Uacute;');
+            rp = rp.replaceAll("?", '&Ntilde;');
+            rp = rp.replaceAll("?", '&Uuml;');
             return rp;
         };
         String.prototype.htmlDecode = function () {
             let rp = this;
-            rp = rp.replaceAll("&aacute;", 'á');
-            rp = rp.replaceAll("&eacute;", 'é');
-            rp = rp.replaceAll("&iacute;", 'í');
-            rp = rp.replaceAll("&oacute;", 'ó');
-            rp = rp.replaceAll("&uacute;", 'ú');
-            rp = rp.replaceAll("&ntilde;", 'ñ');
-            rp = rp.replaceAll("&uuml;", 'ü');
-            rp = rp.replaceAll("&Aacute;", 'Á');
-            rp = rp.replaceAll("&Eacute;", 'É');
-            rp = rp.replaceAll("&Iacute;", 'Í');
-            rp = rp.replaceAll("&Oacute;", 'Ó');
-            rp = rp.replaceAll("&Uacute;", 'Ú');
-            rp = rp.replaceAll("&Ntilde;", 'Ñ');
-            rp = rp.replaceAll("&Uuml;", 'Ü');
+            rp = rp.replaceAll("&aacute;", '?');
+            rp = rp.replaceAll("&eacute;", '?');
+            rp = rp.replaceAll("&iacute;", '?');
+            rp = rp.replaceAll("&oacute;", '?');
+            rp = rp.replaceAll("&uacute;", '?');
+            rp = rp.replaceAll("&ntilde;", '?');
+            rp = rp.replaceAll("&uuml;", '?');
+            rp = rp.replaceAll("&Aacute;", '?');
+            rp = rp.replaceAll("&Eacute;", '?');
+            rp = rp.replaceAll("&Iacute;", '?');
+            rp = rp.replaceAll("&Oacute;", '?');
+            rp = rp.replaceAll("&Uacute;", '?');
+            rp = rp.replaceAll("&Ntilde;", '?');
+            rp = rp.replaceAll("&Uuml;", '?');
             return rp;
         };
         String.prototype.firstWord = function () {
@@ -329,21 +329,26 @@ class Kernel {
                     if (file.relative.endsWith('Controller.js')) {
                         let buildFile = function () {
                             console.log(` --> ${file.relative}`);
-                            let classStringController = fs.readFileSync(file.absolute);
-                            let classController;
+                            let classStringController = fs.readFileSync(file.absolute, 'utf8');
                             let annotations = reflection.getClassAnnotations(classStringController, $this.annotations);
                             annotations.forEach(a => {
                                 classStringController = classStringController.replace(a.annotation, '');
                             });
+                            let classController;
                             try {
-                                eval('classController = ' + classStringController)
+                                if (classStringController.includes('module.exports'))
+                                    classStringController = classStringController.replace('module.exports', 'classController');
+                                else
+                                    classStringController = classStringController.replace('class', 'classController = class');
+                                eval(classStringController);
                             } catch (e) {
                                 console.error(` ${file.relative} no instance`);
                             }
                             if (typeof classController === 'function') {
                                 let controller = new classController();
                                 annotations.forEach(annotation => {
-                                    let abstractAnnotation = eval("$this.annotations." + annotation.annotation);
+                                    let evalString = "$this.annotations." + annotation.annotation.slice(1);
+                                    let abstractAnnotation = eval(evalString);
                                     abstractAnnotation.fn = controller[annotation.fn];
                                     abstractAnnotation.ctrl = controller;
                                     abstractAnnotation.args = annotation.args;
@@ -538,7 +543,6 @@ class Kernel {
     }
 
     addAnnotations(value, fn) {
-        global['@' + value] = fn;
         this._annotations[value] = fn;
     }
 
