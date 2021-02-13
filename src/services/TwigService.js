@@ -2,6 +2,7 @@ const Twig = require('twig');
 const fs = require('fs');
 const path = require('path')
 let config;
+let globalConfig;
 module.exports = {
     render: {
         /**
@@ -11,15 +12,18 @@ module.exports = {
          */
         build: (kernel, application) => {
             config = kernel.getConfig('twig');
-            config.src = path.join(kernel.projectDir , config.src);
+            globalConfig = kernel.globalConfig;
+            config.src = path.join(kernel.projectDir, config.src);
 
         },
         instance: (services) => {
             return (twigFile, data) => {
                 (({$response, $request, $kernel}) => {
-                    let template = fs.readFileSync(path.join(config.src,twigFile ) , 'utf8');
+                    let template = fs.readFileSync(path.join(config.src, twigFile), 'utf8');
                     Twig.extendFunction("asset", value => {
-                        return $request.protocol+'://'+$request.get('host') + '/' +value;
+                        if (globalConfig.prod && globalConfig.domain)
+                            return globalConfig.domain + '/' + value;
+                        return $request.protocol + '://' + $request.get('host') + '/' + value;
                     });
                     let compiled = Twig.twig({
                         data: template,
