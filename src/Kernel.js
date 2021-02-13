@@ -184,6 +184,7 @@ class Kernel {
 
         function getFilesDirectory(directory, origDirectory) {
             directory = directory.replace(/\\\\/, '\\\\');
+            while(directory.endsWith("\\"))directory = directory.slice(0,-1);
             origDirectory = origDirectory || directory;
             let result = [];
             let files = fs.readdirSync(directory, {withFileTypes: true});
