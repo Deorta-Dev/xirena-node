@@ -32,7 +32,7 @@ module.exports = {
             let line;
             do {
                 line = lines[key];
-                if (/^(\s)*[A-Za-z0-9$@\$]{1,}(\((.)*\))/.test(line)) {
+                if (/^(\s)*[A-Za-z0-9\$]{1,}(\s)*(\((.)*\))/.test(line)) {
                     inFunction = true;
                 }
                 if (inFunction) functionString += line;

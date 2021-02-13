@@ -60,9 +60,13 @@ class RouterAnnotation extends AbstractAnnotation {
                         Reflect.apply(currentExecution.fn, currentExecution.ctrl, dataParams);
                     } else sendFinalizeFn();
                 }
+                let isSend = false;
                 function sendFinalizeFn() {
-                    if (typeof dataResponse === 'function') dataResponse(response);
-                    else response.send(dataResponse);
+                    if(!isSend) {
+                        isSend = true;
+                        if (typeof dataResponse === 'function') dataResponse(response);
+                        else response.send(dataResponse);
+                    }
                 }
                 let params = request.params;
                 params['$request'] = request;

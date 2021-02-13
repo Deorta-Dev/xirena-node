@@ -3,8 +3,8 @@ const {ObjectID} = require('mongodb');
 class AbstractController {
 
 
-    constructor() {
-        this._kernel = null;
+    constructor(kernel) {
+        this._kernel = kernel;
         this.handlesAttrs = [];
     }
 
@@ -34,7 +34,6 @@ class AbstractController {
                 else if (data instanceof Date) {
                 } else
                     for (let key in data) {
-                        console.log("Data: ", data);
                         if (key === '$oid') data = new ObjectID(data.$oid);
                         else if (key === '$date') data = new Date(data.$date);
                         else data[key] = recursion(data[key]);

@@ -332,7 +332,8 @@ class Kernel {
                             let classController = require(file.absolute);
                             let annotations = reflection.getClassAnnotations(classController, $this.annotations);
                             if (typeof classController === 'function') {
-                                let controller = new classController();
+                                let controller = new classController($this);
+                                controller.kernel = $this;
                                 annotations.forEach(annotation => {
                                     let evalString = "$this.annotations." + annotation.annotation.slice(1);
                                     let abstractAnnotation = eval(evalString);
