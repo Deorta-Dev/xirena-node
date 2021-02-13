@@ -183,6 +183,7 @@ class Kernel {
         let explorer;
 
         function getFilesDirectory(directory, origDirectory) {
+            directory = directory.replace(/\\\\/, '\\\\');
             origDirectory = origDirectory || directory;
             let result = [];
             let files = fs.readdirSync(directory, {withFileTypes: true});
