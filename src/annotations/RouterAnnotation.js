@@ -1,19 +1,6 @@
 const AbstractAnnotation = require('../AbstractAnnotation');
+const RemoveRoute = require('express-remove-route');
 let handles = [];
-let appScope = {};
-
-function removeRouteIfExist(app, path, method) {
-    let index = -1;
-    if (app && app._router && app._router.stack)
-        app._router.stack.forEach((stack, i) => {
-            if (stack.route && path === stack.route.path && method === stack.route.stack[0].method) {
-                index = i;
-            }
-            return false;
-        });
-    if (index > -1)
-        app._router.stack.slice(index, 1);
-}
 
 class RouterAnnotation extends AbstractAnnotation {
     constructor() {
@@ -32,42 +19,42 @@ class RouterAnnotation extends AbstractAnnotation {
         let app = kernel.expressApp;
         if (!router.startsWith('/')) router = '/' + router;
         this.name = router;
-        removeRouteIfExist(app, router, method);
+        RemoveRoute(app, router, method);
         let fnx = function (request, response) {
             if (!$this.executions)
                 $this.executions = HandleAnnotation.getExecutions($this.handles, $this);
 
             if (Array.isArray($this.executions)) {
                 let executions = $this.executions.clone(), currentExecution, dataResponse;
+
                 function sendFn(data) {
                     dataResponse = data;
                     if (currentExecution)
                         if (!currentExecution.isController) {
                             sendFinalizeFn();
-                        }else nextFn();
+                        } else nextFn();
                 }
+
                 function nextFn() {
                     if (executions.length > 0) {
                         currentExecution = executions.shift();
                         let args = currentExecution.args;
-
-                        let services = kernel.services;
-                        Object.keys(services).forEach((key) =>
-                            params['$' + key] = services[key].instance(params)
-                        );
                         let dataParams = [];
                         args.forEach((arg) => dataParams.push(params[arg] || undefined));
                         Reflect.apply(currentExecution.fn, currentExecution.ctrl, dataParams);
                     } else sendFinalizeFn();
                 }
+
                 let isSend = false;
+
                 function sendFinalizeFn() {
-                    if(!isSend) {
+                    if (!isSend) {
                         isSend = true;
                         if (typeof dataResponse === 'function') dataResponse(response);
                         else response.send(dataResponse);
                     }
                 }
+
                 let params = request.params;
                 params['$request'] = request;
                 params['$response'] = response;
@@ -77,17 +64,19 @@ class RouterAnnotation extends AbstractAnnotation {
                 params['$next'] = nextFn;
                 params['$send'] = sendFn;
                 params['$scope'] = {};
-                if(request.body === undefined){
-                    var body = '';
+                let services = kernel.services;
+                Object.keys(services).forEach(key => params['$' + key] = services[key].instance(params));
+                if (request.body === undefined) {
+                    let body = '';
                     request.on('data', chunk => body += chunk);
-                    request.on('end', ()=> {
-                        try{
+                    request.on('end', () => {
+                        try {
                             body = JSON.parse(body);
-                        }catch (e){}
+                        } catch (e) {}
                         request.body = body;
                         nextFn();
                     });
-                }else  nextFn();
+                } else nextFn();
 
             }
         };
