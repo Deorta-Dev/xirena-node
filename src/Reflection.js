@@ -32,14 +32,16 @@ module.exports = {
             let line;
             do {
                 line = lines[key];
-                if (/^(\s)*[A-Za-z0-9\$]{1,}(\s)*(\((.)*\))/.test(line)) {
+                if (/^((async)(\s){1,})?(\s)*[A-Za-z0-9\$]{1,}(\s)*(\((.)*\))/.test(line)) {
                     inFunction = true;
                 }
                 if (inFunction) functionString += line;
-                if (inFunction && line.includes(')')) inFunction = false;
+                if (inFunction && line.includes(')')) {
+                    inFunction = false; break;
+                }
                 key++;
             } while (key < lines.length);
-
+            functionString = functionString.replace(/((async)(\s){1,})/, '');
             return functionString.replace(/\n|\t\s/, '');
         }
 

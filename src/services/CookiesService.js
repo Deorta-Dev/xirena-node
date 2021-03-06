@@ -8,11 +8,11 @@ module.exports = {
         },
         instance: (services) => {
             let cookieInstance = (name) => {
-                let $request= services.$request;
+                let {$request} = services;
                 let cookiesMap = {};
                 if (typeof $request.headers.cookie === 'string')
                     $request.headers.cookie.split(';').forEach(stringCookie => {
-                        [c, v] = stringCookie.split('=');
+                        let [c, v] = stringCookie.split('=');
                         while (c.startsWith(' ')) c = c.slice(1);
                         while (c.endsWith(' ')) c = c.slice(0, -1);
                         cookiesMap[c] = v;
