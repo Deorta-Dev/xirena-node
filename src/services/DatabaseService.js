@@ -20,22 +20,20 @@ module.exports = {
          */
         build: (kernel, application) => {
             let configs = kernel.getConfig('database');
-            if(!configs) return ;
+            if (!configs) return;
             let connCount = 0, connReady = 0;
-
-            function ready() {
-                connReady++;
-                if (connReady >= connCount)
-                    resolve();
-            }
-
             return new Promise((resolve, reject) => {
-                if (!Array.isArray()) configs = [configs];
+                function ready() {
+                    connReady++;
+                    if (connReady >= connCount)
+                        resolve();
+                }
+
+                if (!Array.isArray(configs)) configs = [configs];
                 configs.forEach((config, key) => {
                     if (config && config['connection'] === 'mongodb') {
                         const MongoClient = require('mongodb').MongoClient;
                         if (config['dns'] !== undefined) {
-                            connCount++;
                             MongoClient.connect(config['dns'], function (err, db) {
                                 if (err) {
                                     reject(err);
@@ -49,23 +47,21 @@ module.exports = {
                         }
                     } else if (config && config['connection'] === 'postgres') {
                         let {user, host, database, password, port} = config;
-                        if (user && host && database && password) {
-                            connCount++;
-                            const {Pool} = require("pg");
-                            let poolClient = new Pool({
-                                user: user,
-                                host: host,
-                                database: database,
-                                password: password,
-                                port: port | 5432,
-                            });
-                            addInstance(poolClient, config.id || key + '');
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
-                        }
+                        const {Pool} = require("pg");
+                        let poolClient = new Pool({
+                            user: user,
+                            host: host,
+                            database: database,
+                            password: password,
+                            port: port | 5432,
+                        });
+                        addInstance(poolClient, config.id || key + '');
+                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
+                        ready();
+
                     } else if (config && config['connection'] === 'mysql') {
                         let {user, host, database, password, port} = config;
                         if (user && host && database && password) {
-                            connCount++;
                             let mysql = require('mysql');
                             let con = mysql.createConnection({
                                 host: host,
@@ -81,6 +77,9 @@ module.exports = {
                                 ready();
                             });
                         }
+                    } else {
+                        console.log('\x1b[34m', 'No Connect Database | ' + config['connection']);
+                        ready();
                     }
                 });
 

@@ -13,7 +13,6 @@ module.exports = {
         build: (kernel, application) => {
             config = kernel.getConfig('twig');
             if(!config) return ;
-
             globalConfig = kernel.globalConfig;
             config.src = path.join(kernel.projectDir, config.src);
 
