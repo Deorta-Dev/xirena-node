@@ -17,6 +17,7 @@ class ListenerAnnotation extends AbstractAnnotation{
         kernel.addListener(this.name, function (socket, data, scope) {
             let params = $this.defaultParams({data: data}, []);
             params['$scope'] = scope;
+            params['$socket'] = socket;
             let dataParams = [];
             args.forEach((arg)=>  dataParams.push(params[arg] || data));
             Reflect.apply(fn, ctrl, dataParams);
