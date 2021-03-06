@@ -1,5 +1,4 @@
 const AbstractAnnotation = require('../AbstractAnnotation');
-const RemoveRoute = require('express-remove-route');
 let handles = [];
 
 class RouterAnnotation extends AbstractAnnotation {
@@ -19,7 +18,6 @@ class RouterAnnotation extends AbstractAnnotation {
         let app = kernel.expressApp;
         if (!router.startsWith('/')) router = '/' + router;
         this.name = router;
-        RemoveRoute(app, router, method);
         let fnx = function (request, response) {
             if (!$this.executions)
                 $this.executions = HandleAnnotation.getExecutions($this.handles, $this);
