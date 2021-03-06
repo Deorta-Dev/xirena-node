@@ -55,17 +55,12 @@ class RouterAnnotation extends AbstractAnnotation {
                     }
                 }
 
-                let params = request.params;
+                let params = $this.defaultParams(request.params);
                 params['$request'] = request;
                 params['$response'] = response;
-                params['$kernel'] = kernel;
-                params['$application'] = kernel.application;
-                params['$appScope'] = kernel.appScope;
                 params['$next'] = nextFn;
                 params['$send'] = sendFn;
-                params['$scope'] = {};
-                let services = kernel.services;
-                Object.keys(services).forEach(key => params['$' + key] = services[key].instance(params));
+
                 if (request.body === undefined) {
                     let body = '';
                     request.on('data', chunk => body += chunk);

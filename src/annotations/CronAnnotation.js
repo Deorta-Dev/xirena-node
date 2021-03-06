@@ -14,17 +14,10 @@ class CronAnnotation extends AbstractAnnotation {
         let kernel = this.kernel;
         let args = this.args;
         let fn = this.fn;
-        let ctrl = this.ctrl
+        let ctrl = this.ctrl;
+        let $this = this;
         let job = new CronJob(this.interval, function () {
-            let params = {};
-            params['$kernel'] = kernel;
-            params['$application'] = kernel.application;
-            params['$scope'] = {};
-            params['$appScope'] = kernel.appScope;
-            let services = kernel.services;
-            Object.keys(services).forEach((key) => {
-                params['$' + key] = services[key].instance();
-            });
+            let params = $this.defaultParams({}, []);
             let dataParams = [];
             args.forEach((arg) => {
                 dataParams.push(params[arg]);
@@ -32,7 +25,6 @@ class CronAnnotation extends AbstractAnnotation {
             Reflect.apply(fn, ctrl, dataParams);
         }, null, true, this.timezone);
         job.start();
-
     }
 
     get timezone() {

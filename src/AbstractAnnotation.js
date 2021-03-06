@@ -1,4 +1,4 @@
-class AbstractAnnotation{
+class AbstractAnnotation {
 
     constructor() {
         this._kernel = null;
@@ -37,8 +37,23 @@ class AbstractAnnotation{
         this._args = value;
     }
 
-    build (){
+    build() {
 
+    }
+
+    defaultParams(params = {}, requires = []) {
+        let kernel = this.kernel;
+        params['$kernel'] = kernel;
+        params['$application'] = kernel.application;
+        params['$scope'] = {};
+        params['$socket'] = kernel.expressIO;
+        params['$appScope'] = kernel.appScope;
+        let services = kernel.services;
+        Object.keys(services).forEach(key => {
+            if (!requires || requires.length === 0 || requires.includes('$' + key) || requires.includes(key))
+                params['$' + key] = services[key].instance(params);
+        });
+        return params;
     }
 
 }

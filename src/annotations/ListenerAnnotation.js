@@ -13,21 +13,12 @@ class ListenerAnnotation extends AbstractAnnotation{
         let args = this.args;
         let fn = this.fn;
         let ctrl = this.ctrl;
-        kernel.addListener(this.name, function (socket, data, scope, appScope) {
-            let params = {data: data};
-            params['$kernel'] = kernel;
-            params['$application'] = kernel.application;
-            params['$socket'] = socket;
+        let $this = this;
+        kernel.addListener(this.name, function (socket, data, scope) {
+            let params = $this.defaultParams({data: data}, []);
             params['$scope'] = scope;
-            params['$appScope'] = appScope;
-            let services = kernel.services;
-            Object.keys(services).forEach( (key)=>{
-                params['$' + key] = services[key].instance();
-            });
             let dataParams = [];
-            args.forEach((arg)=>{
-                dataParams.push(params[arg] || data);
-            });
+            args.forEach((arg)=>  dataParams.push(params[arg] || data));
             Reflect.apply(fn, ctrl, dataParams);
         }, this.condition);
     }

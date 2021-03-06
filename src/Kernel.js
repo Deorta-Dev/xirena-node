@@ -639,6 +639,10 @@ class Kernel {
         return app;
     }
 
+    get expressIO() {
+        return io;
+    }
+
     addService(value, object) {
         this._services[value] = object;
     }
