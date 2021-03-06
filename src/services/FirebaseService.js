@@ -9,6 +9,8 @@ module.exports = {
          */
         build: (kernel, application)=>{
             const config = kernel.getConfig('firebase');
+            if(!config) return ;
+
             if(config){
                 firebaseApp = firebaseAdmin.initializeApp({
                     credential: firebaseAdmin.credential.cert(config),

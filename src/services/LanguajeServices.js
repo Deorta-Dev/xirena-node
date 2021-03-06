@@ -8,6 +8,8 @@ module.exports = {
          */
         build: (kernel, application)=>{
             let langList = kernel.getConfig('lang');
+            if(!langList) return ;
+
             if(langList){
                 console.log('\x1b[34m','Importing Languages', '\x1b[0m');
                 langList.forEach(function (lang) {

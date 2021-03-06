@@ -20,6 +20,7 @@ module.exports = {
          */
         build: (kernel, application) => {
             let configs = kernel.getConfig('database');
+            if(!configs) return ;
             let connCount = 0, connReady = 0;
 
             function ready() {
