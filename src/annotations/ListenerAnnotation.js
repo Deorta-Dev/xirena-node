@@ -21,6 +21,12 @@ class ListenerAnnotation extends AbstractAnnotation{
             let dataParams = [];
             args.forEach((arg)=>  dataParams.push(params[arg] || data));
             Reflect.apply(fn, ctrl, dataParams);
+            setTimeout(function (){
+                for (let key in params) {
+                    if (typeof params[key].$finalizer === 'function')
+                        params[key].$finalize();
+                }
+            }, 60000);
         }, this.condition);
     }
 
