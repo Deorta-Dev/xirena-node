@@ -66,25 +66,24 @@ module.exports = {
                     } else if (config && config['connection'] === 'postgres') {
                         let {user, host, database, password, port} = config;
                         const {Pool} = require("pg");
-                        let poolClient = new Pool({
-                            user: user,
-                            host: host,
-                            database: database,
-                            password: password,
-                            port: port | 5432,
-                        });
+
                         instantiate = function () {
-                            poolClient.connect((err, pgClient) => {
-                                if (err) throw err;
-                                pgClient.$new = instantiate;
-                                pgClient.$finalize = function (){
-                                    pgClient.end();
-                                    this.$finalize = undefined;
-                                };
-                                addInstance(pgClient, config.id || key + '');
-                                console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
-                                ready();
+                            let poolClient = new Pool({
+                                user: user,
+                                host: host,
+                                database: database,
+                                password: password,
+                                port: port | 5432,
                             });
+                            poolClient.connect();
+                            poolClient.$new = instantiate;
+                            poolClient.$finalize = function (){
+                                poolClient.end();
+                                this.$finalize = undefined;
+                            };
+                            addInstance(poolClient, config.id || key + '');
+                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
+                            ready();
                         }
                     } else if (config && config['connection'] === 'mysql') {
                         let {user, host, database, password, port} = config;

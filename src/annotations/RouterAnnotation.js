@@ -50,10 +50,6 @@ class RouterAnnotation extends AbstractAnnotation {
                         isSend = true;
                         if (typeof dataResponse === 'function') dataResponse(response);
                         else response.send(dataResponse);
-                        for (let key in params) {
-                            if (typeof params[key].$finalizer === 'function')
-                                params[key].$finalize();
-                        }
                     }
                 }
 

@@ -23,12 +23,6 @@ class CronAnnotation extends AbstractAnnotation {
                 dataParams.push(params[arg]);
             });
             Reflect.apply(fn, ctrl, dataParams);
-            setTimeout(function (){
-                for (let key in params) {
-                    if (typeof params[key].$finalizer === 'function')
-                        params[key].$finalize();
-                }
-            }, 60000);
         }, null, true, this.timezone);
         job.start();
     }
