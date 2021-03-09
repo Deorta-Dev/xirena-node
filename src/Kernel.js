@@ -474,7 +474,7 @@ class Kernel {
 
 
     onReady(fn) {
-        _readyFns.push(fn);
+        this._readyFns.push(fn);
     }
 
     start() {
