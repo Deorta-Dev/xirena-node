@@ -430,7 +430,7 @@ class Kernel {
     }
 
 
-    startApplication() {
+    startApplication(fn) {
         let config = this.globalConfig;
         app.use(express.json({type: '*/*'}));
         let publicDir = this._projectDir + '/public';
@@ -454,6 +454,7 @@ class Kernel {
                 console.log(string);
                 console.log(' +----------------------------------------------------------+\n');
                 console.log("\x1b[0m", '');
+                if(typeof fn === 'function') fn();
             });
         } else {
             let options = {};
@@ -468,6 +469,7 @@ class Kernel {
                 console.log(string);
                 console.log(' +------------------------------------------------+\n');
                 console.log("\x1b[0m", '');
+                if(typeof fn === 'function') fn();
             });
         }
     }
@@ -482,12 +484,13 @@ class Kernel {
 
         function runStart() {
             if ($this._buildReady) {
-                $this._readyFns.forEach(fn => {
-                    if (typeof fn === 'function')
-                        fn($this);
+                $this.startApplication(function (){
+                    $this.startListeners();
+                    $this._readyFns.forEach(fn => {
+                        if (typeof fn === 'function')
+                            fn($this);
+                    });
                 });
-                $this.startApplication();
-                $this.startListeners();
             } else setTimeout(runStart, 100);
         }
 
