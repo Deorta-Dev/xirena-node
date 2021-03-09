@@ -1,15 +1,15 @@
 let instances = {};
 let getInstance = undefined
+
 function addInstance(instance, id) {
     instance.c = getInstance = name => {
         let instance = instances[name].shift();
         let l = instances[name].length - 20;
-        for (let i = 0; i < l; i++)
-            instance.$new();
-        setTimeout(function (){
-            if(typeof instance.$finalize === 'function')
+        instance.$new();
+        setTimeout(function () {
+            if (typeof instance.$finalize === 'function')
                 instance.$finalize();
-        },60000);
+        }, 60000);
         return instance;
     }
     if (!Array.isArray(instances[id])) instances[id] = [];
@@ -51,13 +51,13 @@ module.exports = {
                                         reject(err);
                                         throw err;
                                     } else {
-                                        if(waitFirst){
+                                        if (waitFirst) {
                                             console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mongodb', '\x1b[0m');
                                             waitFirst = false;
                                         }
                                         let instance = db.db(config['database']);
                                         instance.$new = instantiate;
-                                        instance.$finalize = function (){
+                                        instance.$finalize = function () {
                                             db.close();
                                             this.$finalize = undefined;
                                         };
@@ -79,13 +79,13 @@ module.exports = {
                                 password: password,
                                 port: port | 5432,
                             });
-                            poolClient.connect(function (err, client){
-                                if(waitFirst){
+                            poolClient.connect(function (err, client) {
+                                if (waitFirst) {
                                     console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
                                     waitFirst = false;
                                 }
                                 client.$new = instantiate;
-                                client.$finalize = function (){
+                                client.$finalize = function () {
                                     client.end();
                                     this.$finalize = undefined;
                                 };
@@ -108,13 +108,13 @@ module.exports = {
                             let waitFirst = true;
                             instantiate = function () {
                                 con.connect(function (err, client) {
-                                    if(waitFirst){
+                                    if (waitFirst) {
                                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
                                         waitFirst = false;
                                     }
                                     if (err) throw err;
                                     con.$new = instantiate;
-                                    con.$finalize = function (){
+                                    con.$finalize = function () {
                                         client.close();
                                         this.$finalize = undefined;
                                     };
