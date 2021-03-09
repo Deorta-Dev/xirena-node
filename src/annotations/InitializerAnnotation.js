@@ -6,11 +6,11 @@ class InitializerAnnotation extends AbstractAnnotation{
     }
 
     build() {
-        let kernel = this.kernel;
+        let kernel = this.kernel, $this = this;
         kernel.onReady(function (){
-            let args = this.args;
-            let fn = this.fn;
-            let ctrl = this.ctrl;
+            let args = $this.args;
+            let fn = $this.fn;
+            let ctrl = $this.ctrl;
             let params = this.defaultParams({}, []);
             let dataParams = [];
             args.forEach((arg)=>{
