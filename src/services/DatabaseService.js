@@ -44,6 +44,7 @@ module.exports = {
                     if (config && config['connection'] === 'mongodb') {
                         let MongoClient = require('mongodb').MongoClient;
                         if (config['dns'] !== undefined) {
+                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mongodb', '\x1b[0m');
                             instantiate = function () {
                                 MongoClient.connect(config['dns'], function (err, db) {
                                     if (err) {
@@ -57,7 +58,6 @@ module.exports = {
                                             this.$finalize = undefined;
                                         };
                                         addInstance(instance, config.id || key + '');
-                                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mongodb', '\x1b[0m');
                                         ready();
                                     }
                                 });
@@ -66,6 +66,7 @@ module.exports = {
                     } else if (config && config['connection'] === 'postgres') {
                         let {user, host, database, password, port} = config;
                         const {Pool} = require("pg");
+                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
 
                         instantiate = function () {
                             let poolClient = new Pool({
@@ -82,7 +83,6 @@ module.exports = {
                                 this.$finalize = undefined;
                             };
                             addInstance(poolClient, config.id || key + '');
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
                             ready();
                         }
                     } else if (config && config['connection'] === 'mysql') {
@@ -96,6 +96,7 @@ module.exports = {
                                 database: database,
                                 port: port || 3306
                             });
+                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mysql', '\x1b[0m');
                             instantiate = function () {
                                 con.connect(function (err, client) {
                                     if (err) throw err;
@@ -105,7 +106,6 @@ module.exports = {
                                         this.$finalize = undefined;
                                     };
                                     addInstance(con, config.id || key + '');
-                                    console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mysql', '\x1b[0m');
                                     ready();
                                 });
                             };
