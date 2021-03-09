@@ -44,13 +44,17 @@ module.exports = {
                     if (config && config['connection'] === 'mongodb') {
                         let MongoClient = require('mongodb').MongoClient;
                         if (config['dns'] !== undefined) {
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mongodb', '\x1b[0m');
+                            let waitFirst = true;
                             instantiate = function () {
                                 MongoClient.connect(config['dns'], function (err, db) {
                                     if (err) {
                                         reject(err);
                                         throw err;
                                     } else {
+                                        if(waitFirst){
+                                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mongodb', '\x1b[0m');
+                                            waitFirst = false;
+                                        }
                                         let instance = db.db(config['database']);
                                         instance.$new = instantiate;
                                         instance.$finalize = function (){
@@ -66,8 +70,7 @@ module.exports = {
                     } else if (config && config['connection'] === 'postgres') {
                         let {user, host, database, password, port} = config;
                         const {Pool} = require("pg");
-                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Postgres', '\x1b[0m');
-
+                        let waitFirst = true;
                         instantiate = function () {
                             let poolClient = new Pool({
                                 user: user,
@@ -76,14 +79,20 @@ module.exports = {
                                 password: password,
                                 port: port | 5432,
                             });
-                            poolClient.connect();
-                            poolClient.$new = instantiate;
-                            poolClient.$finalize = function (){
-                                poolClient.end();
-                                this.$finalize = undefined;
-                            };
-                            addInstance(poolClient, config.id || key + '');
-                            ready();
+                            poolClient.connect(function (err, client){
+                                if(waitFirst){
+                                    console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
+                                    waitFirst = false;
+                                }
+                                client.$new = instantiate;
+                                client.$finalize = function (){
+                                    client.end();
+                                    this.$finalize = undefined;
+                                };
+                                addInstance(client, config.id || key + '');
+                                ready();
+                            });
+
                         }
                     } else if (config && config['connection'] === 'mysql') {
                         let {user, host, database, password, port} = config;
@@ -96,9 +105,13 @@ module.exports = {
                                 database: database,
                                 port: port || 3306
                             });
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ': Mysql', '\x1b[0m');
+                            let waitFirst = true;
                             instantiate = function () {
                                 con.connect(function (err, client) {
+                                    if(waitFirst){
+                                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
+                                        waitFirst = false;
+                                    }
                                     if (err) throw err;
                                     con.$new = instantiate;
                                     con.$finalize = function (){
