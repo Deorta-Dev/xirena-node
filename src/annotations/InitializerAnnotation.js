@@ -11,7 +11,7 @@ class InitializerAnnotation extends AbstractAnnotation{
             let args = $this.args;
             let fn = $this.fn;
             let ctrl = $this.ctrl;
-            let params = this.defaultParams({}, []);
+            let params = $this.defaultParams({}, []);
             let dataParams = [];
             args.forEach((arg)=>{
                 dataParams.push(params[arg]);
