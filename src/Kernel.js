@@ -391,20 +391,7 @@ class Kernel {
         let kernel = this;
 
         io.on('connection', socket => {
-            let $socket = {
-                _current_id: undefined,
-                id: socket.id,
-                to: (id) => {
-                    this._current_id = id;
-                    return $socket;
-                },
-                emit: (nameEvent, data) => {
-                    if (this._current_id != undefined) {
-                        let response = btoa(unescape(encodeURIComponent(JSON.stringify(data))));
-                        socket.to(this._current_id).emit(nameEvent, response);
-                    } else console.debug("ID SOCKET UNDEFINED");
-                }
-            }
+            let $socket = socket;
             let $c = {};
 
             kernel.listeners.forEach(listener => {
