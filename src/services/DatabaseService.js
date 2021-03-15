@@ -7,12 +7,12 @@ function addInstance(instance, id) {
     instance.c = getInstance = name => {
         let instance = instances[name].shift();
         if (debug) console.log("Remaining connections:", instances[name].length);
-        for (let i = 0; i < instances[name].length - 40; i++);
-            instantiates[name](name);
+        for (let i = 0; i < instances[name].length - 70; i++);
+        instantiates[name](name);
         setTimeout(function () {
             if (typeof instance.$finalize === 'function')
                 instance.$finalize();
-        }, 60000);
+        }, 10000);
         return instance;
     }
     if (!Array.isArray(instances[id])) instances[id] = [];
@@ -42,7 +42,7 @@ module.exports = {
 
                 if (!Array.isArray(configs)) configs = [configs];
                 configs.forEach((config, key) => {
-                    config.instances = config.instances || 40;
+                    config.instances = config.instances || 70;
                     connCount += config.instances;
                     let instantiate;
                     if (config && config['connection'] === 'mongodb') {
@@ -85,10 +85,12 @@ module.exports = {
                                 port: port | 5432,
                             });
                             poolClient.connect(function (err, client) {
-                                if (waitFirst) {
-                                    console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
-                                    waitFirst = false;
-                                }
+                                if (err) throw err;
+                                if(err)
+                                    if (waitFirst) {
+                                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
+                                        waitFirst = false;
+                                    }
                                 client.$finalize = function () {
                                     client.end();
                                     this.$finalize = undefined;
@@ -113,11 +115,12 @@ module.exports = {
                             instantiate = function (id) {
                                 if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
                                 con.connect(function (err, client) {
+                                    if (err) throw err;
                                     if (waitFirst) {
                                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
                                         waitFirst = false;
                                     }
-                                    if (err) throw err;
+
                                     con.$finalize = function () {
                                         client.close();
                                         this.$finalize = undefined;

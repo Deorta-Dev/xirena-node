@@ -1,6 +1,6 @@
 {
   "name": "xirena-node",
-  "version": "1.5.45",
+  "version": "1.5.46",
   "description": "Xirena Node busca ser un marco de desarrollo que apoye a programar  en Nodejs por medio de controladores, servicios y anotaciones, de esta forma llevar un desarrollo agil y comodo.",
   "main": "index.js",
   "scripts": {
