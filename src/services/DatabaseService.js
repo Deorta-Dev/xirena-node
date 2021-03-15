@@ -55,7 +55,6 @@ module.exports = {
                                             waitFirst = false;
                                         }
                                         let instance = db.db(config['database']);
-                                        instance.$new = instantiate;
                                         instance.$finalize = function () {
                                             db.close();
                                             this.$finalize = undefined;
@@ -83,7 +82,6 @@ module.exports = {
                                     console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
                                     waitFirst = false;
                                 }
-                                client.$new = instantiate;
                                 client.$finalize = function () {
                                     client.end();
                                     this.$finalize = undefined;
@@ -112,7 +110,6 @@ module.exports = {
                                         waitFirst = false;
                                     }
                                     if (err) throw err;
-                                    con.$new = instantiate;
                                     con.$finalize = function () {
                                         client.close();
                                         this.$finalize = undefined;
