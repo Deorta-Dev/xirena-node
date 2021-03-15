@@ -3,13 +3,12 @@ let getInstance = undefined
 
 function addInstance(instance, id) {
     instance.c = getInstance = name => {
-        let instance = instances[name].shift();
-        let l = instances[name].length - 20;
-        instance.$new();
+        let instance = instances[name][0];
+        /*instance.$new();
         setTimeout(function () {
             if (typeof instance.$finalize === 'function')
                 instance.$finalize();
-        }, 60000);
+        }, 60000);*/
         return instance;
     }
     if (!Array.isArray(instances[id])) instances[id] = [];
