@@ -1,14 +1,14 @@
 let instances = {};
 let getInstance = undefined
-
+let instantiates = {};
 function addInstance(instance, id) {
     instance.c = getInstance = name => {
-        let instance = instances[name][0];
-        /*instance.$new();
+        let instance = instances[name].shift();
+        instantiates[name](name);
         setTimeout(function () {
             if (typeof instance.$finalize === 'function')
                 instance.$finalize();
-        }, 60000);*/
+        }, 60000);
         return instance;
     }
     if (!Array.isArray(instances[id])) instances[id] = [];
@@ -70,7 +70,7 @@ module.exports = {
                         let {user, host, database, password, port} = config;
                         const {Pool} = require("pg");
                         let waitFirst = true;
-                        instantiate = function () {
+                        instantiate = function (id) {
                             let poolClient = new Pool({
                                 user: user,
                                 host: host,
@@ -105,7 +105,7 @@ module.exports = {
                                 port: port || 3306
                             });
                             let waitFirst = true;
-                            instantiate = function () {
+                            instantiate = function (id) {
                                 con.connect(function (err, client) {
                                     if (waitFirst) {
                                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
@@ -126,9 +126,11 @@ module.exports = {
                         console.log('\x1b[34m', 'No Connect Database | ' + config['connection']);
                         ready();
                     }
+                    instantiates[config.id || key + ''] = instantiate;
+                    if(instantiates['default'] === undefined ) instantiates['default'] = instantiate;
                     if (typeof instantiate === 'function') {
                         for (let i = 0; i < config.instances; i++) {
-                            instantiate();
+                            instantiate(config.id || key + '');
                         }
                     }
                 });
