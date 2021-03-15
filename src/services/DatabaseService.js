@@ -44,7 +44,7 @@ module.exports = {
                         let MongoClient = require('mongodb').MongoClient;
                         if (config['dns'] !== undefined) {
                             let waitFirst = true;
-                            instantiate = function () {
+                            instantiate = function (id) {
                                 MongoClient.connect(config['dns'], function (err, db) {
                                     if (err) {
                                         reject(err);
@@ -59,7 +59,7 @@ module.exports = {
                                             db.close();
                                             this.$finalize = undefined;
                                         };
-                                        addInstance(instance, config.id || key + '');
+                                        addInstance(instance, id || key + '');
                                         ready();
                                     }
                                 });
@@ -86,7 +86,7 @@ module.exports = {
                                     client.end();
                                     this.$finalize = undefined;
                                 };
-                                addInstance(client, config.id || key + '');
+                                addInstance(client, id || key + '');
                                 ready();
                             });
 
@@ -114,7 +114,7 @@ module.exports = {
                                         client.close();
                                         this.$finalize = undefined;
                                     };
-                                    addInstance(con, config.id || key + '');
+                                    addInstance(con, id|| key + '');
                                     ready();
                                 });
                             };
