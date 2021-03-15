@@ -1,9 +1,12 @@
 let instances = {};
 let getInstance = undefined
 let instantiates = {};
+let debug = process.argv.includes('--debug-database');
+
 function addInstance(instance, id) {
     instance.c = getInstance = name => {
         let instance = instances[name].shift();
+        if(debug) console.log("Remaining connections:", instances[name].length);
         instantiates[name](name);
         setTimeout(function () {
             if (typeof instance.$finalize === 'function')
@@ -17,6 +20,7 @@ function addInstance(instance, id) {
         instances['default'] = instances[id];
     }
 }
+
 
 module.exports = {
     "database": {
@@ -45,6 +49,7 @@ module.exports = {
                         if (config['dns'] !== undefined) {
                             let waitFirst = true;
                             instantiate = function (id) {
+                                if (debug) console.log('\x1b[34m','Create new connection:' + config['database'] + '|Mongodb', '\x1b[0m');
                                 MongoClient.connect(config['dns'], function (err, db) {
                                     if (err) {
                                         reject(err);
@@ -70,6 +75,7 @@ module.exports = {
                         const {Pool} = require("pg");
                         let waitFirst = true;
                         instantiate = function (id) {
+                            if (debug) console.log('\x1b[34m','Create new connection:' + config['database'] + '|PostgreSQL', '\x1b[0m');
                             let poolClient = new Pool({
                                 user: user,
                                 host: host,
@@ -104,6 +110,7 @@ module.exports = {
                             });
                             let waitFirst = true;
                             instantiate = function (id) {
+                                if (debug) console.log('\x1b[34m','Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
                                 con.connect(function (err, client) {
                                     if (waitFirst) {
                                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
@@ -114,7 +121,7 @@ module.exports = {
                                         client.close();
                                         this.$finalize = undefined;
                                     };
-                                    addInstance(con, id|| key + '');
+                                    addInstance(con, id || key + '');
                                     ready();
                                 });
                             };
@@ -124,7 +131,7 @@ module.exports = {
                         ready();
                     }
                     instantiates[config.id || key + ''] = instantiate;
-                    if(instantiates['default'] === undefined ) instantiates['default'] = instantiate;
+                    if (instantiates['default'] === undefined) instantiates['default'] = instantiate;
                     if (typeof instantiate === 'function') {
                         for (let i = 0; i < config.instances; i++) {
                             instantiate(config.id || key + '');

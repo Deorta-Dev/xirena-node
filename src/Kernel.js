@@ -395,7 +395,7 @@ class Kernel {
             let $c = {};
 
             kernel.listeners.forEach(listener => {
-                if (listener.name == '$connection') {
+                if (listener.name === '$connection') {
                     listener.fn($socket, {}, $c, appScope);
                 }
             });
@@ -403,7 +403,7 @@ class Kernel {
             kernel.listeners.forEach((listener) => {
                 if (listener.name !== '$disconnect' && listener.name !== '$connection')
                     socket.on(listener.name, function (data) {
-                        if (data !== '' && data !== undefined && data !== null && typeof data == 'string') data = JSON.parse(decodeURIComponent(escape(atob(data))));
+                        if (data !== '' && data !== undefined && data !== null && typeof data === 'string') data = JSON.parse(decodeURIComponent(escape(atob(data))));
                         if (eval(listener.condition)) listener.fn($socket, data, $c, appScope);
                     });
             });
@@ -538,8 +538,8 @@ class Kernel {
         if (this._config[name] === undefined) {
             let dir = this.configDir ? path.join(this.configDir, name + ".json") : path.join(this._projectDir, "config/" + name + ".json");
             if (fs.existsSync(dir)) {
-                if (this._config == undefined) this._config = {};
-                if (this._config[name] == undefined) this._config[name] = require(dir);
+                if (this._config === undefined) this._config = {};
+                if (this._config[name] === undefined) this._config[name] = require(dir);
             }
         }
         return this._config[name];
@@ -547,7 +547,7 @@ class Kernel {
     }
 
     get globalConfig() {
-        if (this._globalConfig == undefined) {
+        if (this._globalConfig === undefined) {
             let name = 'config';
             let dir = this.configDir ? path.join(this.configDir, name + ".json") : path.join(this._projectDir, "config/" + name + ".json");
             if (fs.existsSync(dir)) {
