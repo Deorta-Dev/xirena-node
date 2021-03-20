@@ -18,7 +18,7 @@ class RouterAnnotation extends AbstractAnnotation {
         let app = kernel.expressApp;
         if (!router.startsWith('/')) router = '/' + router;
         this.name = router;
-        let fnx = function (request, response) {
+        let fnx = async function (request, response) {
             if (!$this.executions)
                 $this.executions = HandleAnnotation.getExecutions($this.handles, $this);
 
@@ -53,7 +53,7 @@ class RouterAnnotation extends AbstractAnnotation {
                     }
                 }
 
-                let params = $this.defaultParams(request.params);
+                let params = await $this.defaultParams(request.params);
                 params['$request'] = request;
                 params['$response'] = response;
                 params['$next'] = nextFn;

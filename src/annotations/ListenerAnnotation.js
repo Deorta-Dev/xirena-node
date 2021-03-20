@@ -14,8 +14,8 @@ class ListenerAnnotation extends AbstractAnnotation{
         let fn = this.fn;
         let ctrl = this.ctrl;
         let $this = this;
-        kernel.addListener(this.name, function (socket, data, scope) {
-            let params = $this.defaultParams({data: data}, []);
+        kernel.addListener(this.name, async function (socket, data, scope) {
+            let params = await $this.defaultParams({data: data}, []);
             params['$scope'] = scope;
             params['$socket'] = socket;
             let dataParams = [];

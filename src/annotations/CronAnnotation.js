@@ -16,8 +16,8 @@ class CronAnnotation extends AbstractAnnotation {
         let fn = this.fn;
         let ctrl = this.ctrl;
         let $this = this;
-        let job = new CronJob(this.interval, function () {
-            let params = $this.defaultParams({}, []);
+        let job = new CronJob(this.interval, async function () {
+            let params = await $this.defaultParams({}, []);
             let dataParams = [];
             args.forEach((arg) => {
                 dataParams.push(params[arg]);

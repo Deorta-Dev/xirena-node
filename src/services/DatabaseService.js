@@ -4,11 +4,12 @@ let instantiates = {};
 let debug = process.argv.includes('--debug-database');
 
 function addInstance(instance, id) {
-    instance.c = getInstance = name => {
+    instance.c = getInstance = async name => {
         let instance = instances[name].shift();
         if (debug) console.log("Remaining connections:", instances[name].length);
-        for (let i = 0; i < instances[name].length - 70; i++);
-        instantiates[name](name);
+        for (let i = 0; i < instances[name].length - 50; i++)
+            if (instances[name].length < 2) await instantiates[name](name);
+            else instantiates[name](name);
         setTimeout(function () {
             if (typeof instance.$finalize === 'function')
                 instance.$finalize();
@@ -42,14 +43,14 @@ module.exports = {
 
                 if (!Array.isArray(configs)) configs = [configs];
                 configs.forEach((config, key) => {
-                    config.instances = config.instances || 70;
+                    config.instances = config.instances || 50;
                     connCount += config.instances;
                     let instantiate;
                     if (config && config['connection'] === 'mongodb') {
                         let MongoClient = require('mongodb').MongoClient;
                         if (config['dns'] !== undefined) {
                             let waitFirst = true;
-                            instantiate = function (id) {
+                            instantiate = async function (id) {
                                 if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mongodb', '\x1b[0m');
                                 MongoClient.connect(config['dns'], function (err, db) {
                                     if (err) {
@@ -63,7 +64,8 @@ module.exports = {
                                         let instance = db.db(config['database']);
                                         instance.$finalize = function () {
                                             db.close();
-                                            this.$finalize = undefined;
+                                            this.$finalize = function () {
+                                            };
                                         };
                                         addInstance(instance, id || key + '');
                                         ready();
@@ -75,7 +77,7 @@ module.exports = {
                         let {user, host, database, password, port} = config;
                         const {Pool} = require("pg");
                         let waitFirst = true;
-                        instantiate = function (id) {
+                        instantiate = async function (id) {
                             if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|PostgreSQL', '\x1b[0m');
                             let poolClient = new Pool({
                                 user: user,
@@ -86,14 +88,15 @@ module.exports = {
                             });
                             poolClient.connect(function (err, client) {
                                 if (err) throw err;
-                                if(err)
+                                if (err)
                                     if (waitFirst) {
                                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|PostgreSQL', '\x1b[0m');
                                         waitFirst = false;
                                     }
                                 client.$finalize = function () {
                                     client.end();
-                                    this.$finalize = undefined;
+                                    this.$finalize = function () {
+                                    };
                                 };
                                 addInstance(client, id || key + '');
                                 ready();
@@ -112,7 +115,7 @@ module.exports = {
                                 port: port || 3306
                             });
                             let waitFirst = true;
-                            instantiate = function (id) {
+                            instantiate = async function (id) {
                                 if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
                                 con.connect(function (err, client) {
                                     if (err) throw err;
@@ -123,7 +126,8 @@ module.exports = {
 
                                     con.$finalize = function () {
                                         client.close();
-                                        this.$finalize = undefined;
+                                        this.$finalize = function () {
+                                        };
                                     };
                                     addInstance(con, id || key + '');
                                     ready();
@@ -146,8 +150,8 @@ module.exports = {
             });
 
         },
-        instance: () => {
-            return getInstance('default');
+        instance: async () => {
+            return await getInstance('default');
         }
     }
 };
