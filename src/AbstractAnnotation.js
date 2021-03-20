@@ -41,7 +41,7 @@ class AbstractAnnotation {
 
     }
 
-    defaultParams(params = {}, requires = []) {
+    async defaultParams(params = {}, requires = []) {
         let kernel = this.kernel;
         params['$kernel'] = kernel;
         params['$application'] = kernel.application;
@@ -49,10 +49,16 @@ class AbstractAnnotation {
         params['$socket'] = kernel.expressIO;
         params['$appScope'] = kernel.appScope;
         let services = kernel.services;
-        Object.keys(services).forEach(key => {
-            if (!requires || requires.length === 0 || requires.includes('$' + key) || requires.includes(key))
-                params['$' + key] = services[key].instance(params);
-        });
+        for(let key in services){
+            if (!requires || requires.length === 0 || requires.includes('$' + key) || requires.includes(key)) {
+                let $return = services[key].instance(params);
+                if($return instanceof Promise){
+                    params['$' + key] = await $return;
+                }else{
+                    params['$' + key] = $return;
+                }
+            }
+        }
         return params;
     }
 
