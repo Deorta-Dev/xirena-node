@@ -59,6 +59,14 @@ class AbstractAnnotation {
                 }
             }
         }
+        params['$next'] = function (){
+            params['$finalize']();
+        }
+        params['$finalize'] = function (){
+            for(let key in params){
+                if(params[key] && typeof params[key].$finalize === 'function') params[key].$finalize();
+            }
+        }
         return params;
     }
 
