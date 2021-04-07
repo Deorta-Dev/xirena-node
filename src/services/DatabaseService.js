@@ -53,14 +53,17 @@ function createConnectionPostgres(config) {
             let {user, host, database, password, port} = config;
             const {Pool} = require("pg");
             if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + ' | PostgreSQL', '\x1b[0m');
-            let poolClient = new Pool({
-                user: user,
-                host: host,
-                database: database,
-                password: password,
-                port: port | 5432,
-            });
-            poolClient.connect(function (err, client) {
+            if (config.client === undefined) {
+                config.client = new Pool({
+                    user: user,
+                    host: host,
+                    database: database,
+                    password: password,
+                    port: port | 5432,
+                });
+
+            }
+            config.client.connect(function (err, connection) {
                 if (err) {
                     reject(err);
                     throw err;
@@ -70,16 +73,16 @@ function createConnectionPostgres(config) {
                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ' | PostgreSQL', '\x1b[0m');
                     }
                     config.firstConnect = true;
-                    client.$finalize = function () {
-                        client.end();
+                    connection.$finalize = function () {
+                        connection.end();
                         if (Array.isArray(config.connections))
                             config.connections.forEach((con, i) => {
-                                if (client === con) {
+                                if (connection === con) {
                                     config.connections.splice(i, 1);
                                 }
                             })
                     };
-                    resolve(client);
+                    resolve(connection);
                 }
             });
         }
@@ -92,38 +95,37 @@ function createConnectionMySql(config) {
             let {user, host, database, password, port} = config;
             if (user && host && database && password) {
                 let mysql = require('mysql');
-                let con = mysql.createConnection({
-                    host: host,
-                    user: user,
-                    password: password,
-                    database: database,
-                    port: port || 3306
-                });
-                let waitFirst = true;
-                instantiate = async function (id) {
-                    if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
-                    con.connect(function (err, client) {
-                        if (err) {
-                            reject(err);
-                            throw err;
-                        }
-                        if (!config.firstConnect || debug) {
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
-                        }
-                        config.firstConnect = true
-
-                        con.$finalize = function () {
-                            client.close();
-                            if (Array.isArray(config.connections))
-                                config.connections.forEach((con, i) => {
-                                    if (client === con) {
-                                        config.connections.splice(i, 1);
-                                    }
-                                });
-                        };
-                        resolve(con);
+                if (config.client === undefined) {
+                    config.client = mysql.createConnection({
+                        host: host,
+                        user: user,
+                        password: password,
+                        database: database,
+                        port: port || 3306
                     });
-                };
+                }
+                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
+                config.client.connect(function (err, connection) {
+                    if (err) {
+                        reject(err);
+                        throw err;
+                    }
+                    if (!config.firstConnect || debug) {
+                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
+                    }
+                    config.firstConnect = true
+
+                    connection.$finalize = function () {
+                        connection.close();
+                        if (Array.isArray(config.connections))
+                            config.connections.forEach((con, i) => {
+                                if (connection === con) {
+                                    config.connections.splice(i, 1);
+                                }
+                            });
+                    };
+                    resolve(connection);
+                });
             }
         }
     });
@@ -144,17 +146,17 @@ function createConnectionMongoDB(config) {
                             console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mongodb', '\x1b[0m');
                         }
                         config.firstConnect = true;
-                        let instance = db.db(config['database']);
-                        instance.$finalize = function () {
+                        let connection = db.db(config['database']);
+                        connection.$finalize = function () {
                             db.close();
                             if (Array.isArray(config.connections))
                                 config.connections.forEach((con, i) => {
-                                    if (db === con) {
+                                    if (connection === con) {
                                         config.connections.splice(i, 1);
                                     }
                                 })
                         };
-                        resolve(instance);
+                        resolve(connection);
                     }
                 });
             }
