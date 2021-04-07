@@ -32,7 +32,7 @@ module.exports = {
             let line;
             do {
                 line = lines[key];
-                if (/^((async)(\s){1,})?(\s)*[A-Za-z0-9\$]{1,}(\s)*(\((.)*\))/.test(line)) {
+                if (/^(\s)*((async)(\s){1,})?(\s)*[A-Za-z0-9\$]{1,}(\((.)*\))/.test(line)) {
                     inFunction = true;
                 }
                 if (inFunction) functionString += line;
