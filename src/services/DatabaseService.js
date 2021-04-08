@@ -10,8 +10,8 @@ function getConnection(name) {
         return connection;
     }
 
-    if (Array.isArray(config.connections) && config.connections.length > 1) {
-        let connection = config.connections.shift();
+    if (Array.isArray(config.connectionsList) && config.connectionsList.length > 1) {
+        let connection = config.connectionsList.shift();
         createConnection(name);
         return prepare(connection);
     }else{
@@ -24,73 +24,52 @@ function getConnection(name) {
 
 function createConnection(name) {
     return new Promise(resolve => {
-        let config = GlobalConfig[name] || GlobalConfig['default'];
-        let waiting = true;
+        let config = GlobalConfig[name] || GlobalConfig['default'], connection;
 
         function ready(connection) {
+            if (!Array.isArray(config.connectionsList)) config.connectionsList = [connection];
+            else config.connectionsList.push(connection);
             connection.c = name => {
                 return createConnection(name);
             }
-            config.connections.push(connection);
-            waiting = false;
             resolve(connection);
         }
 
-        setTimeout(() => {
-            if (waiting) {
-                if (config.connections.length > 0) {
-                    let con = config.connections.shift();
-                    if (debug)
-                        console.log(new Date(), "Return previous connection");
-                    if (con) ready(con);
-                } else {
-                    console.error(new Date(), 'There are no more connections');
-                }
-
-            }
-
-        }, 500);
-
         switch (config.connection) {
             case 'postgres':
-                createConnectionPostgres(config).then(ready);
+                connection = createConnectionPostgres(config).then(ready);
                 break;
             case 'mysql':
-                createConnectionMySql(config).then(ready);
+                connection = createConnectionMySql(config).then(ready);
                 break;
             case 'mongodb':
-                createConnectionMongoDB(config).then(ready);
+                connection = createConnectionMongoDB(config).then(ready);
                 break;
         }
-
     });
 }
 
 function createConnectionPostgres(config) {
     return new Promise((resolve, reject) => {
         if (config && config['connection'] === 'postgres') {
-            let {user, host, database, password, port, instannces} = config;
+            let {user, host, database, password, port} = config;
             const {Pool} = require("pg");
-            if (debug) console.log(new Date(), '\x1b[34m', 'Create new connection:' + config['database'] + ' | PostgreSQL', '\x1b[0m');
-            if (config.client === undefined) {
-                config.client = new Pool({
+            if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + ' | PostgreSQL', '\x1b[0m');
+            while(config.clientsList.length < config.clients){
+                config.clientsList.push(new Pool({
                     user: user,
                     host: host,
                     database: database,
                     password: password,
                     port: port | 5432,
-                    max: 80,
-                });
+                    max: config.max || 5
+                }));
             }
-            config.client.connect(function (err, connection) {
+            let client = config.clientsList.shift();
+            client.connect(function (err, connection) {
                 if (err) {
-                    if (config.connections.length > 0) {
-                        resolve(config.connections.shift());
-                    } else {
-                        reject(err);
-                        throw 'The connection to the database could not be established';
-                    }
-
+                    reject(err);
+                    throw err;
                 } else {
 
                     if (!config.firstConnect || debug) {
@@ -98,19 +77,18 @@ function createConnectionPostgres(config) {
                     }
                     config.firstConnect = true;
                     connection.$finalize = function () {
-                        if (connection.isFinalied) return;
-                        connection.release();
-                        if (Array.isArray(config.connections))
-                            config.connections.forEach((con, i) => {
+                        connection.end();
+                        if (Array.isArray(config.connectionsList))
+                            config.connectionsList.forEach((con, i) => {
                                 if (connection === con) {
-                                    config.connections.splice(i, 1);
+                                    config.connectionsList.splice(i, 1);
                                 }
                             })
-                        connection.isFinalied = true;
                     };
                     resolve(connection);
                 }
             });
+            config.clientsList.push(client);
         }
     });
 }
@@ -130,7 +108,7 @@ function createConnectionMySql(config) {
                         port: port || 3306
                     });
                 }
-                if (debug) console.log(new Date(), '\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
+                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
                 config.client.connect(function (err, connection) {
                     if (err) {
                         reject(err);
@@ -143,10 +121,10 @@ function createConnectionMySql(config) {
 
                     connection.$finalize = function () {
                         connection.close();
-                        if (Array.isArray(config.connections))
-                            config.connections.forEach((con, i) => {
+                        if (Array.isArray(config.connectionsList))
+                            config.connectionsList.forEach((con, i) => {
                                 if (connection === con) {
-                                    config.connections.splice(i, 1);
+                                    config.connectionsList.splice(i, 1);
                                 }
                             });
                     };
@@ -162,7 +140,7 @@ function createConnectionMongoDB(config) {
         if (config && config['connection'] === 'mongodb') {
             let MongoClient = require('mongodb').MongoClient;
             if (config['dns'] !== undefined) {
-                if (debug) console.log(new Date(), '\x1b[34m', 'Create new connection:' + config['database'] + '|Mongodb', '\x1b[0m');
+                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mongodb', '\x1b[0m');
                 MongoClient.connect(config['dns'], function (err, db) {
                     if (err) {
                         reject(err);
@@ -175,10 +153,10 @@ function createConnectionMongoDB(config) {
                         let connection = db.db(config['database']);
                         connection.$finalize = function () {
                             db.close();
-                            if (Array.isArray(config.connections))
-                                config.connections.forEach((con, i) => {
+                            if (Array.isArray(config.connectionsList))
+                                config.connectionsList.forEach((con, i) => {
                                     if (connection === con) {
-                                        config.connections.splice(i, 1);
+                                        config.connectionsList.splice(i, 1);
                                     }
                                 })
                         };
@@ -215,8 +193,11 @@ module.exports = {
                 for (let key in configs) {
                     let config = configs[key];
                     if (config && typeof config != 'function') {
-                        config.instances = config.instances || 30;
-                        config.connections = [];
+                        config.instances = config.instances || config.connections || 30;
+                        config.clients = config.clients || 20;
+                        config.connectionsList = [];
+                        config.clientsList = [];
+
                         GlobalConfig[config.id || key + ''] = config;
                         if (GlobalConfig['default'] === undefined) GlobalConfig['default'] = config;
                         for (let i = 0; i < config.instances; i++) {
