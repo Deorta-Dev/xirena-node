@@ -1,6 +1,8 @@
 let debug = process.argv.includes('--debug-database');
 let GlobalConfig = {};
 
+
+
 function getConnection(name) {
     let config = GlobalConfig[name] || GlobalConfig['default'];
 
@@ -10,27 +12,36 @@ function getConnection(name) {
         return connection;
     }
 
-    if (Array.isArray(config.connectionsList) && config.connectionsList.length > 1) {
+    let now = new Date();
+
+    if (Array.isArray(config.connectionsList) && config.connectionsList.length > 0) {
         let connection = config.connectionsList.shift();
         createConnection(name);
-        return prepare(connection);
-    }else{
+
         return new Promise(resolve => {
-            createConnection(name).then(connection => resolve(prepare(connection)));
+            resolve(prepare(connection));
+        });
+    } else {
+        return new Promise(resolve => {
+            for (let i = 0; i < config.instances * 0.25; i++) {
+                createConnection(name);
+            }
+            createConnection(name, false).then(connection => {
+                resolve(prepare(connection));
+            });
         });
     }
 
 }
 
-function createConnection(name) {
+function createConnection(name, save = true) {
     return new Promise(resolve => {
         let config = GlobalConfig[name] || GlobalConfig['default'], connection;
 
         function ready(connection) {
-            if (!Array.isArray(config.connectionsList)) config.connectionsList = [connection];
-            else config.connectionsList.push(connection);
-            connection.c = name => {
-                return createConnection(name);
+            if (save) {
+                if (!Array.isArray(config.connectionsList)) config.connectionsList = [connection];
+                else config.connectionsList.push(connection);
             }
             resolve(connection);
         }
@@ -54,30 +65,43 @@ function createConnectionPostgres(config) {
         if (config && config['connection'] === 'postgres') {
             let {user, host, database, password, port} = config;
             const {Pool} = require("pg");
-            if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + ' | PostgreSQL', '\x1b[0m');
-            while(config.clientsList.length < config.clients){
-                config.clientsList.push(new Pool({
-                    user: user,
-                    host: host,
-                    database: database,
-                    password: password,
-                    port: port | 5432,
-                    max: config.max || 5
-                }));
+            if (config.clientsList.length < config.clients) {
+                while (config.clientsList.length < config.clients) {
+                    let c = new Pool({
+                        user: user,
+                        host: host,
+                        database: database,
+                        password: password,
+                        port: port | 5432,
+                        max: config.max || 5
+                    });
+                    c.name = 'client-' + config.clientsList.length;
+                    config.clientsList.push(c);
+                }
             }
             let client = config.clientsList.shift();
+            if (debug) console.log(new Date(), '\x1b[34mCreate new connection:' + config['database'] + ' | PostgreSQL:', client.name, '\x1b[0m', config.connectionsList.length);
+
             client.connect(function (err, connection) {
                 if (err) {
-                    reject(err);
-                    throw err;
+                    function retry(resolveRetry) {
+                        setTimeout(() => {
+                            if (debug)
+                                console.log('\x1b[31m', 'Reconnect Database: ' + config['database'] + ' | PostgreSQL', '\x1b[0m');
+                            createConnectionPostgres(config).then(resolveRetry).catch(() => retry(resolveRetry));
+                        }, 500);
+                    }
+                    retry(resolve);
+
                 } else {
 
                     if (!config.firstConnect || debug) {
                         console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ' | PostgreSQL', '\x1b[0m');
                     }
+
                     config.firstConnect = true;
                     connection.$finalize = function () {
-                        connection.end();
+                        connection.release();
                         if (Array.isArray(config.connectionsList))
                             config.connectionsList.forEach((con, i) => {
                                 if (connection === con) {
@@ -185,7 +209,7 @@ module.exports = {
                 function ready() {
                     connReady++;
                     if (connReady >= connCount) {
-                        console.log("Database Service Ready")
+                        console.log(" Database Service Ready")
                         resolve();
                     }
                 }
@@ -211,7 +235,35 @@ module.exports = {
 
         },
         instance: () => {
-            return getConnection('default');
+            let localInstance;
+
+            function object(a, b) {
+                let database = 'default', fn = undefined;
+                if (b != undefined) {
+                    database = a;
+                    fn = b;
+                } else {
+                    if (typeof a === 'string') database = a;
+                    else fn = a;
+                }
+                let promise = getConnection(database);
+                return new Promise(resolve => {
+                    promise.then(connect => {
+                        localInstance = connect;
+                        if (typeof fn === 'function')
+                            fn(connect);
+                        resolve(connect);
+                    });
+                })
+            }
+
+            object.$finalize = function () {
+                if (localInstance) {
+                    localInstance.$finalize();
+                }
+            }
+            return object;
+
         }
     }
 };

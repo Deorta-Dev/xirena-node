@@ -25,6 +25,7 @@ class Kernel {
         this._services = {};
         this._buildReady = false;
         this._readyFns = [];
+        global.$$Kernel = this;
 
         global.isDebug = process.argv.includes('--debug');
 
