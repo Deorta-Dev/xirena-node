@@ -101,7 +101,9 @@ function createConnectionPostgres(config) {
 
                     config.firstConnect = true;
                     connection.$finalize = function () {
+                        if(connection.isDisconnet) return true;
                         connection.release();
+                        connection.isDisconnet = true;
                         if (Array.isArray(config.connectionsList))
                             config.connectionsList.forEach((con, i) => {
                                 if (connection === con) {
