@@ -235,9 +235,9 @@ module.exports = {
 
         },
         instance: () => {
-            let localInstance;
+            let localConnections = [];
 
-            function object(a, b) {
+            function objectConnection(a, b) {
                 let database = 'default', fn = undefined;
                 if (b != undefined) {
                     database = a;
@@ -248,21 +248,24 @@ module.exports = {
                 }
                 let promise = getConnection(database);
                 return new Promise(resolve => {
-                    promise.then(connect => {
-                        localInstance = connect;
+                    promise.then(connection => {
+                        localConnections.push(connection);
+                        for (let functionName in connection) {
+                            if(typeof connection[functionName] === 'function')
+                                objectConnection[functionName] = () =>{ return Reflect.apply(connection[functionName], connection, arguments); }
+                            else objectConnection[functionName] = connection[functionName];
+                        }
                         if (typeof fn === 'function')
-                            fn(connect);
-                        resolve(connect);
+                            fn(connection);
+                        resolve(connection);
                     });
                 })
             }
 
-            object.$finalize = function () {
-                if (localInstance) {
-                    localInstance.$finalize();
-                }
+            objectConnection.$finalize = function () {
+                for(let connection of localConnections) connection.$$finalize();
             }
-            return object;
+            return objectConnection;
 
         }
     }
