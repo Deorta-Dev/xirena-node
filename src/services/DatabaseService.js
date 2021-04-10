@@ -101,15 +101,16 @@ function createConnectionPostgres(config) {
 
                     config.firstConnect = true;
                     connection.$finalize = function () {
-                        if(connection.isDisconnet) return true;
-                        connection.release();
-                        connection.isDisconnet = true;
-                        if (Array.isArray(config.connectionsList))
-                            config.connectionsList.forEach((con, i) => {
-                                if (connection === con) {
-                                    config.connectionsList.splice(i, 1);
+                        try{
+                            connection.release();
+                            if (Array.isArray(config.connectionsList))
+                                for(let [i, con] of config.connectionsList.entries()){
+                                    if (connection === con) {
+                                        config.connectionsList.splice(i, 1);
+                                        break;
+                                    }
                                 }
-                            })
+                        }catch (e){}
                     };
                     resolve(connection);
                 }
