@@ -135,14 +135,14 @@ function createConnectionMySql(config) {
                         port: port || 3306
                     });
                 }
-                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mysql', '\x1b[0m');
+                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + ' | Mysql', '\x1b[0m');
                 config.client.connect(function (err, connection) {
                     if (err) {
                         reject(err);
                         throw err;
                     }
                     if (!config.firstConnect || debug) {
-                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mysql', '\x1b[0m');
+                        console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ' | Mysql', '\x1b[0m');
                     }
                     config.firstConnect = true
 
@@ -165,16 +165,28 @@ function createConnectionMySql(config) {
 function createConnectionMongoDB(config) {
     return new Promise((resolve, reject) => {
         if (config && config['connection'] === 'mongodb') {
-            let MongoClient = require('mongodb').MongoClient;
             if (config['dns'] !== undefined) {
-                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + '|Mongodb', '\x1b[0m');
-                MongoClient.connect(config['dns'], function (err, db) {
+                if (debug) console.log('\x1b[34m', 'Create new connection:' + config['database'] + ' | Mongodb', '\x1b[0m');
+                if (config.clientsList.length < config.clients) {
+                    while (config.clientsList.length < config.clients) {
+                        let c = new require('mongodb').MongoClient(config['dns'], {useUnifiedTopology: true});
+                        c.name = 'client-' + config.clientsList.length;
+                        config.clientsList.push(c);
+                    }
+                }
+                let client = config.clientsList.shift();
+                client.connect(function (err, db) {
                     if (err) {
-                        reject(err);
-                        throw err;
+                        function retry(resolveRetry) {
+                            setTimeout(() => {
+                                if (debug)
+                                    console.log('\x1b[31m', 'Reconnect Database: ' + config['database'] + ' | Mongodb', '\x1b[0m');
+                                createConnectionPostgres(config).then(resolveRetry).catch(() => retry(resolveRetry));
+                            }, 500);
+                        }
                     } else {
                         if (!config.firstConnect || debug) {
-                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + '|Mongodb', '\x1b[0m');
+                            console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ' | Mongodb', '\x1b[0m');
                         }
                         config.firstConnect = true;
                         let connection = db.db(config['database']);
