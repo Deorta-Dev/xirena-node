@@ -1,6 +1,11 @@
 let queryable = require('queryable');
-
-
+let collections = {};
+function getCollection(name){
+    if(collections[name]) return collections[name];
+    else{
+        return collections[name] =  queryable.open(name);
+    }
+}
 module.exports = {
     "queryable": {
         /**
@@ -18,7 +23,7 @@ module.exports = {
         },
         instance: () => {
             return function (dbName = 'default'){
-                return queryable.open(dbName);
+                return getCollection(dbName);
             }
         }
     }
