@@ -175,7 +175,7 @@ function createConnectionMongoDB(config) {
                     }
                 }
                 let client = config.clientsList.shift();
-                client.connect(function (err, db) {
+                client.connect(function (err, connection) {
                     if (err) {
                         function retry(resolveRetry) {
                             setTimeout(() => {
@@ -189,9 +189,9 @@ function createConnectionMongoDB(config) {
                             console.log('\x1b[34m', 'Connect Database: ' + config['database'] + ' | Mongodb', '\x1b[0m');
                         }
                         config.firstConnect = true;
-                        let connection = db.db(config['database']);
-                        connection.$finalize = function () {
-                            db.close();
+                        let db = connection.db(config['database']);
+                        db.$finalize = function () {
+                            connection.close();
                             if (Array.isArray(config.connectionsList))
                                 config.connectionsList.forEach((con, i) => {
                                     if (connection === con) {
@@ -199,7 +199,7 @@ function createConnectionMongoDB(config) {
                                     }
                                 })
                         };
-                        resolve(connection);
+                        resolve(db);
                     }
                 });
             }
@@ -254,7 +254,7 @@ module.exports = {
 
             function objectConnection(a, b) {
                 let database = 'default', fn = undefined;
-                if (b != undefined) {
+                if (b !== undefined) {
                     database = a;
                     fn = b;
                 } else {
