@@ -2,7 +2,6 @@ let debug = process.argv.includes('--debug-database');
 let GlobalConfig = {};
 
 
-
 function getConnection(name) {
     let config = GlobalConfig[name] || GlobalConfig['default'];
 
@@ -36,7 +35,7 @@ function getConnection(name) {
 
 function createConnection(name, save = true) {
     return new Promise(resolve => {
-        let config = GlobalConfig[name] || GlobalConfig['default'], connection;
+        let config = GlobalConfig[name] || GlobalConfig['default'];
 
         function ready(connection) {
             if (save) {
@@ -48,13 +47,13 @@ function createConnection(name, save = true) {
 
         switch (config.connection) {
             case 'postgres':
-                connection = createConnectionPostgres(config).then(ready);
+                createConnectionPostgres(config).then(ready);
                 break;
             case 'mysql':
-                connection = createConnectionMySql(config).then(ready);
+                createConnectionMySql(config).then(ready);
                 break;
             case 'mongodb':
-                connection = createConnectionMongoDB(config).then(ready);
+                createConnectionMongoDB(config).then(ready);
                 break;
         }
     });
@@ -91,6 +90,7 @@ function createConnectionPostgres(config) {
                             createConnectionPostgres(config).then(resolveRetry).catch(() => retry(resolveRetry));
                         }, 500);
                     }
+
                     retry(resolve);
 
                 } else {
@@ -101,16 +101,17 @@ function createConnectionPostgres(config) {
 
                     config.firstConnect = true;
                     connection.$finalize = function () {
-                        try{
+                        try {
                             connection.release();
                             if (Array.isArray(config.connectionsList))
-                                for(let [i, con] of config.connectionsList.entries()){
+                                for (let [i, con] of config.connectionsList.entries()) {
                                     if (connection === con) {
                                         config.connectionsList.splice(i, 1);
                                         break;
                                     }
                                 }
-                        }catch (e){}
+                        } catch (e) {
+                        }
                     };
                     resolve(connection);
                 }
@@ -224,7 +225,7 @@ module.exports = {
                 function ready() {
                     connReady++;
                     if (connReady >= connCount) {
-                        console.log(" Database Service Ready")
+                        console.log(" Database Service Ready");
                         resolve();
                     }
                 }
@@ -266,8 +267,10 @@ module.exports = {
                     promise.then(connection => {
                         localConnections.push(connection);
                         for (let functionName in connection) {
-                            if(typeof connection[functionName] === 'function')
-                                objectConnection[functionName] = () =>{ return Reflect.apply(connection[functionName], connection, arguments); }
+                            if (typeof connection[functionName] === 'function')
+                                objectConnection[functionName] = () => {
+                                    return Reflect.apply(connection[functionName], connection, arguments);
+                                }
                             else objectConnection[functionName] = connection[functionName];
                         }
                         if (typeof fn === 'function')
@@ -278,9 +281,12 @@ module.exports = {
             }
 
             objectConnection.$finalize = function () {
-                for(let connection of localConnections) connection.$$finalize();
+                for (let connection of localConnections) connection.$finalize();
             }
-            return objectConnection;
+            objectConnection.connect = objectConnection;
+            if (GlobalConfig['default']['autoConnect'])
+                return objectConnection('default');
+            else return objectConnection;
 
         }
     }
