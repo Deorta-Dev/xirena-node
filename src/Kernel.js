@@ -28,7 +28,7 @@ class Kernel {
         global.$$Kernel = this;
 
         global.isDebug = process.argv.includes('--debug');
-        require('GlobalFunctions');
+        require('./GlobalFunctions');
 
     }
 
