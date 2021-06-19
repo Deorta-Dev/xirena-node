@@ -284,7 +284,7 @@ module.exports = {
                 for (let connection of localConnections) connection.$finalize();
             }
             objectConnection.connect = objectConnection;
-            if (GlobalConfig['default']['autoConnect'])
+            if (GlobalConfig['default'] && GlobalConfig['default']['autoConnect'])
                 return objectConnection('default');
             else return objectConnection;
 

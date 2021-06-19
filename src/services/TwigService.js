@@ -27,10 +27,17 @@ module.exports = {
                         return $request.protocol + '://' + $request.get('host') + '/' + value;
                     });
                     let compiled = Twig.twig({
+                        engine: 'twig',
+                        engineOptions: function (info) {
+                            return { path: info.filename }
+                        },
+                        strictVariables: true,
                         data: template,
+                        allowInlineIncludes: true,
                         namespaces: {
                             'views': config.src
                         },
+                        path: config.src
                     }).render(data);
                     $response.send(compiled);
                 })(services);
